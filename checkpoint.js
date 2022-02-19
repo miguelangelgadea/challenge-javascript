@@ -33,7 +33,12 @@ const {
 // < 16
 
 function exponencial(exp) {
-
+    // return function (base) {
+    //     return base ** exp
+    //Retornamos una funcion
+    return function (base) {
+        return Math.pow(base, exp);
+    }
 }
 
 // ----- Recursión -----
@@ -69,7 +74,25 @@ function exponencial(exp) {
 // haciendo los movimientos SUR->ESTE->NORTE
 // Aclaraciones: el segundo parametro que recibe la funcion ('direccion') puede ser pasado vacio (null)
 
-function direcciones(laberinto) {
+// Recibe dos argumentos
+function direcciones(laberinto, direccion = '') {
+    // Validamos si no tiene un laberinto
+    if (!laberinto) return direccion;
+    // Recorremos cada key del obj laberinto
+    for (let prop in laberinto) {
+        //Primer condicion, validando si es el 'destino'
+        if(laberinto[prop] === 'destino'){
+        return direccion + prop;
+        }
+        //Validamos si la key es un objeto
+        //En caso de serlo, devolvemos el laberinto y dirección actual de manera recursiva.
+        if (typeof laberinto[prop] === 'object') {
+            direccion += prop;
+            return direcciones(laberinto[prop], direccion);
+        }
+    }
+    //Retornamos dirección final
+    return direccion;
 
 }
 
@@ -88,7 +111,19 @@ function direcciones(laberinto) {
 // deepEqualArrays([0,1,[[0,1,2],1,2]], [0,1,[[0,1,2],1,2]]) => true
 
 function deepEqualArrays(arr1, arr2) {
-
+    //Valida si inicialmente los arrys son distintos
+    if (arr1.length !== arr2.length) return false;
+    //Iteramos sobre cada elemento
+    for (let i = 0; i < arr1.length; i++) {
+        //Validamos si es un Array el arr1, y valimos el arr2
+        if (arr1[i] instanceof Array && Array.isArray(arr2[i])) {
+            //Lllamos de manera negada y recursivamente
+            if (!deepEqualArrays(arr1[i], arr2[i])) return false;
+            // Validamos si son distintos en la misma posición
+        }   else if (arr1[i] !== arr2[i]) return false;
+    }
+    //Si es igual, true
+    return true;
 }
 
 
@@ -139,7 +174,21 @@ OrderedLinkedList.prototype.print = function(){
 // < 'head --> 5 --> 3 --> 1 --> null'
 //               4
 OrderedLinkedList.prototype.add = function(val){
-    
+    // Validamos si el head está vacio
+    if (!this.head) {
+        this.head = new Node(val)
+        return
+    }
+    // De no estarlo, guardamos el current
+    let current = this.head
+    //Recorremos la lista, buscando que tenga current.next, y el valor sea mayor al argumento.
+    while (current.next && current.value > val) {
+        current = current.next
+    }
+    // Guardamos el resto de la lista de manera auxiliar.
+    let aux = current.next
+    current.next = new Node(val)
+    current.next.next = aux
 }
 
 
@@ -159,7 +208,19 @@ OrderedLinkedList.prototype.add = function(val){
 // < null
 
 OrderedLinkedList.prototype.removeHigher = function(){
-    
+    //Valida si no tiene head
+    if (!this.head) return null;
+    //Si no tiene siguiente el head, 
+    if (!this.head.next) {
+        //
+        let current = this.head.value
+        this.head = null
+        return current
+    } else {
+        let current = this.head.value
+        this.head = this.head.next
+        return current
+    }
 }
 
 
@@ -179,7 +240,24 @@ OrderedLinkedList.prototype.removeHigher = function(){
 // < null
 
 OrderedLinkedList.prototype.removeLower = function(){
-    
+    //Validamos si no tiene head
+    if (!this.head) return null;
+    //Validamos si es un único elemento
+    if (!this.head.next) {
+        let current = this.head.value
+        this.head = null
+        return current
+    } else {
+        //Caso de no ser un único elemento
+        let current = this.head
+        while (current.next.next) {
+            current = current.next
+        }
+        //Guardamos ante ultimo valor.
+        let aux = current.next.value
+        current.next = null
+        return aux
+    }
 }
 
 
@@ -212,7 +290,20 @@ OrderedLinkedList.prototype.removeLower = function(){
 // < ["2-1", "1-1", "1-2", "2-2"];
 
 function multiCallbacks(cbs1, cbs2){
-    
+    //Guardamos en una nueva variable, el resultado concadetano y sorteado.
+    let callbacks = cbs1.concat(cbs2).sort(function(a, b) {
+        return a.time - b.time;
+    })
+    //Iteramos con FOR por cada obj y lo vamos pusheando.
+    let results = []
+    for (let i = 0; i < callbacks.length; i++) {
+        results.push(callbacks[i].cb())
+    }
+    // let results = callbacks.map(function(valor){
+    //     return valor.cb()
+    // })
+    return results
+
 }
 
 
@@ -230,9 +321,15 @@ function multiCallbacks(cbs1, cbs2){
 // 5   9
 // resultado:[5,8,9,32,64]
 
-BinarySearchTree.prototype.toArray = function() {
-    
-}
+BinarySearchTree.prototype.toArray = function(current = this, arry = []) {
+    //
+    if (!current) return []
+    this.toArray(current.left, arry)
+    arry.push(current.value)
+    this.toArray(current.right, arry)
+
+    return arry;
+}   
 
 
 
@@ -249,8 +346,18 @@ BinarySearchTree.prototype.toArray = function() {
 // Si bien esta no es la mejor implementacion existente, con que uds puedan 
 // informarse sobre algoritmos, leerlos de un pseudocodigo e implemnterlos alcanzara
 
-function primalityTest(n) {
+function primalityTest(num) {
+    if (num <= 3) return num > 1;
+    if ((num % 2 === 0) || (num % 3 === 0)) return false;
     
+    let count = 5;
+    
+    while (Math.pow(count, 2) <= num) {
+    if (num % count === 0 || num % (count + 2) === 0) return false;
+        count += 6;
+    }
+    
+    return true;
 }
 
 
